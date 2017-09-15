@@ -13,14 +13,9 @@ defmodule PhoenixDocker.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", PhoenixDocker do
-    pipe_through :browser # Use the default browser stack
+  scope "/api", PhoenixDocker do
+    pipe_through :api
 
-    get "/", PageController, :index
+    post "/operations", OperationController, :create
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", PhoenixDocker do
-  #   pipe_through :api
-  # end
 end
