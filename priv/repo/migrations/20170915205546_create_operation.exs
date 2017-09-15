@@ -11,7 +11,5 @@ defmodule PhoenixDocker.Repo.Migrations.CreateOperation do
 
       timestamps
     end
-
-    create unique_index(:operations, [:account])
   end
 end
