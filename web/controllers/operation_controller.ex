@@ -9,6 +9,10 @@ defmodule PhoenixDocker.OperationController do
   plug :scrub_params, "amount" when action in [:create]
   plug :scrub_params, "done_at" when action in [:create]
 
+  def index(conn, _) do
+    render conn, "index.json"
+  end
+
   def create(conn, params) do
     {_, done_at} = Timex.parse params["done_at"], "{YYYY}-{0M}-{0D}"
 
@@ -26,11 +30,11 @@ defmodule PhoenixDocker.OperationController do
     })
 
     case Repo.insert(changeset) do
-      {:ok, operation} ->
+      {:ok, _} ->
         conn
         |> put_status(:created)
         |> json %{created: :ok}
-      {:error, changeset} ->
+      {:error, _} ->
         conn
         |> put_status(:unprocessable_entity)
         |> json %{reason: :error}

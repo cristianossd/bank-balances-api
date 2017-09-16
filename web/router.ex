@@ -16,6 +16,7 @@ defmodule PhoenixDocker.Router do
   scope "/api", PhoenixDocker do
     pipe_through :api
 
+    get "/", OperationController, :index
     post "/operations", OperationController, :create
   end
 end
