@@ -6,8 +6,8 @@ defmodule PhoenixDocker.Operation do
     field :type, :string
     field :description, :string
     field :amount, :decimal
-    field :date, :naive_datetime
+    field :done_at, :naive_datetime
 
-    timestamps
+    timestamps()
   end
 end

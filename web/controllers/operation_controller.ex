@@ -5,7 +5,7 @@ defmodule PhoenixDocker.OperationController do
   alias PhoenixDocker.Operation
 
   def create(conn, params) do
-    date = ~N[2017-05-10 10:10:10]
+    {_, done_at} = Timex.parse params["done_at"], "{YYYY}-{0M}-{0D}"
     amount = if (is_debit? params["type"]), do: params["amount"] * -1, else: params["amount"]
 
     operation = %Operation{
@@ -13,7 +13,7 @@ defmodule PhoenixDocker.OperationController do
       type: params["type"],
       description: params["description"],
       amount: amount,
-      date: date
+      done_at: done_at
     }
 
     {:ok, _} = Repo.insert(operation)

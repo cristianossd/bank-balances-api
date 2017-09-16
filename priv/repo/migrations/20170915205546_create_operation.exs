@@ -7,9 +7,9 @@ defmodule PhoenixDocker.Repo.Migrations.CreateOperation do
       add :type, :string
       add :description, :string
       add :amount, :decimal
-      add :date, :naive_datetime
+      add :done_at, :naive_datetime
 
-      timestamps
+      timestamps()
     end
   end
 end
