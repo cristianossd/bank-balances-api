@@ -1,29 +1,45 @@
 defmodule PhoenixDocker.OperationController do
-  require Logger
   use PhoenixDocker.Web, :controller
 
   alias PhoenixDocker.Operation
 
+  plug :scrub_params, "account" when action in [:create]
+  plug :scrub_params, "type" when action in [:create]
+  plug :scrub_params, "description" when action in [:create]
+  plug :scrub_params, "amount" when action in [:create]
+  plug :scrub_params, "done_at" when action in [:create]
+
   def create(conn, params) do
     {_, done_at} = Timex.parse params["done_at"], "{YYYY}-{0M}-{0D}"
-    amount = if (is_debit? params["type"]), do: params["amount"] * -1, else: params["amount"]
 
-    operation = %Operation{
+    amount = params["amount"]
+    if is_debit? params["type"] do
+      amount = amount * -1
+    end
+
+    changeset = Operation.changeset(%Operation{}, %{
       account: params["account"],
       type: params["type"],
       description: params["description"],
       amount: amount,
       done_at: done_at
-    }
+    })
 
-    {:ok, _} = Repo.insert(operation)
-    json conn, :ok
+    case Repo.insert(changeset) do
+      {:ok, operation} ->
+        conn
+        |> put_status(:created)
+        |> json %{created: :ok}
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> json %{response: :error}
+    end
   end
 
-  def is_debit? type do
+  defp is_debit? type do
     types = ["purchase", "withdrawal", "debit"]
 
-    len = length(Enum.filter(types, fn(t) -> t == type end))
-    len > 0
+    Enum.member?(types, type)
   end
 end
