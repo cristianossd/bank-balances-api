@@ -9,13 +9,14 @@ defmodule PhoenixDocker.OperationController do
   plug :scrub_params, "amount" when action in [:create]
   plug :scrub_params, "done_at" when action in [:create]
 
+  def index(conn, _) do
+    render conn, "index.json"
+  end
+
   def create(conn, params) do
     {_, done_at} = Timex.parse params["done_at"], "{YYYY}-{0M}-{0D}"
 
-    amount = params["amount"]
-    if is_debit? params["type"] do
-      amount = amount * -1
-    end
+    amount = if (is_debit? params["type"]), do: params["amount"] * -1, else: params["amount"]
 
     changeset = Operation.changeset(%Operation{}, %{
       account: params["account"],
@@ -26,14 +27,14 @@ defmodule PhoenixDocker.OperationController do
     })
 
     case Repo.insert(changeset) do
-      {:ok, operation} ->
+      {:ok, _} ->
         conn
         |> put_status(:created)
-        |> json %{created: :ok}
+        |> render("created.json")
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json %{reason: :error}
+        |> json(%{reason: :error})
     end
   end
 
