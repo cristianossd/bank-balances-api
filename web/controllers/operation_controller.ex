@@ -33,7 +33,7 @@ defmodule PhoenixDocker.OperationController do
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json %{response: :error}
+        |> json %{reason: :error}
     end
   end
 
