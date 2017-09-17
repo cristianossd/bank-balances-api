@@ -31,7 +31,7 @@ defmodule PhoenixDocker.OperationController do
         conn
         |> put_status(:created)
         |> render("created.json")
-      {:error, changeset} ->
+      {:error, _} ->
         conn
         |> put_status(:unprocessable_entity)
         |> json(%{reason: :error})
