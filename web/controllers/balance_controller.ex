@@ -36,6 +36,8 @@ defmodule PhoenixDocker.BalanceController do
       order_by: op.done_at
     )
 
+    groups = Enum.group_by(operations, fn(op) -> op.done_at end)
+
     conn
     |> render("show_statement.json")
   end
