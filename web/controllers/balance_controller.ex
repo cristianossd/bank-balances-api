@@ -17,7 +17,7 @@ defmodule PhoenixDocker.BalanceController do
       order_by: op.done_at
     )
 
-    balance = Enum.reduce(operations, D.new(0), fn(op, total) -> Decimal.add(op.amount, total) end)
+    balance = calculate_balance operations
 
     conn
     |> render("show.json", balance)
@@ -31,14 +31,47 @@ defmodule PhoenixDocker.BalanceController do
     operations = Repo.all(
       from op in Operation,
       where: op.account == ^account_num,
+      where: op.done_at < ^start_at,
+      order_by: op.done_at
+    )
+
+    prev_balance = if (length(operations) == 0), do: D.new(0), else: calculate_balance(operations)
+
+    operations = Repo.all(
+      from op in Operation,
+      where: op.account == ^account_num,
       where: op.done_at >= ^start_at,
       where: op.done_at <= ^end_at,
       order_by: op.done_at
     )
 
-    groups = Enum.group_by(operations, fn(op) -> op.done_at end)
+    statement =
+      operations
+      |> Enum.group_by(fn(op) -> op.done_at end)
+      |> Enum.map(fn {date, group} ->
+          {prev_balance, new_statement} = get_daily_statement(date, group, prev_balance)
+          new_statement
+         end)
+
+    IO.inspect statement
 
     conn
     |> render("show_statement.json")
+  end
+
+  defp calculate_balance operations do
+    Enum.reduce(operations, D.new(0), fn(op, total) -> D.add(op.amount, total) end)
+  end
+
+  defp get_daily_statement date, group, balance do
+    format_date = Timex.format! date, "{0D}/{0M}/{YYYY}"
+
+    daily_statement = %{
+      date: format_date,
+      operations: [],
+      balance: balance
+    }
+
+    {balance, daily_statement}
   end
 end
