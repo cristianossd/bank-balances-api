@@ -53,22 +53,29 @@ defmodule PhoenixDocker.BalanceController do
           new_statement
          end)
 
-    IO.inspect statement
-
     conn
-    |> render("show_statement.json")
+    |> json statement
   end
 
   defp calculate_balance operations do
     Enum.reduce(operations, D.new(0), fn(op, total) -> D.add(op.amount, total) end)
   end
 
-  defp get_daily_statement date, group, balance do
-    format_date = Timex.format! date, "{0D}/{0M}/{YYYY}"
+  defp get_daily_statement date, operations, balance do
+    formatted_date = Timex.format! date, "{0D}/{0M}/{YYYY}"
 
+    daily_operations = Enum.map(operations, fn(op) ->
+      zero = D.new(0)
+      negative = D.new(-1)
+
+      amount = if (op.amount < zero), do: op.amount * negative, else: op.amount
+      %{description: op.description, amount: amount}
+    end)
+
+    balance = Enum.reduce(operations, balance, fn(op, total) -> D.add(op.amount, total) end)
     daily_statement = %{
-      date: format_date,
-      operations: [],
+      date: formatted_date,
+      operations: daily_operations,
       balance: balance
     }
 
