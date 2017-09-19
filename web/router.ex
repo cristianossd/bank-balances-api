@@ -23,5 +23,8 @@ defmodule PhoenixDocker.Router do
     # balance
     get "/balance/:account", BalanceController, :show
     get "/balance/:account/statement", BalanceController, :get_statement
+
+    # account
+    get "/account/:account/debt-periods", AccountController, :get_debt_periods
   end
 end
