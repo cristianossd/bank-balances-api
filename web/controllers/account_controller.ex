@@ -16,6 +16,7 @@ defmodule PhoenixDocker.AccountController do
     )
 
     days = Enum.group_by(operations, fn(op) -> op.done_at end)
+
     {periods, balance} = Enum.map_reduce(days, D.new(0), fn({date, daily_operations}, total) ->
       balance = Enum.reduce(daily_operations, total, fn(op, acc) -> D.add(op.amount, total) end)
 
@@ -27,6 +28,22 @@ defmodule PhoenixDocker.AccountController do
 
       {%{start_date: start_date, principal: balance, in_debt: in_debt}, balance}
     end)
+
+    {periods, _} = Enum.map_reduce(Enum.reverse(periods), :empty, fn(period, date) ->
+      formatted_day_before = nil
+
+      if date != :empty do
+        {_, date} = Timex.parse date, "{0D}/{0M}/{YYYY}"
+        day_before = Timex.shift date, days: -1
+        formatted_day_before = Timex.format! day_before, "{0D}/{0M}/{YYYY}"
+      end
+
+      period = Map.put_new(period, :end_date, formatted_day_before)
+
+      {period, period.start_date}
+    end)
+
+    periods = Enum.reverse(periods)
 
     conn
     |> json(periods)
