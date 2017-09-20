@@ -2,10 +2,10 @@ defmodule PhoenixDocker.OperationController do
   use PhoenixDocker.Web, :controller
 
   alias PhoenixDocker.Operation
+  alias Decimal, as: D
 
   plug :scrub_params, "account" when action in [:create]
   plug :scrub_params, "type" when action in [:create]
-  plug :scrub_params, "description" when action in [:create]
   plug :scrub_params, "amount" when action in [:create]
   plug :scrub_params, "done_at" when action in [:create]
 
@@ -16,7 +16,10 @@ defmodule PhoenixDocker.OperationController do
   def create(conn, params) do
     {_, done_at} = Timex.parse params["done_at"], "{YYYY}-{0M}-{0D}"
 
-    amount = if (is_debit? params["type"]), do: params["amount"] * -1, else: params["amount"]
+    amount = params["amount"]
+    if amount < 0 or is_debit?(params["type"]) do
+      amount = amount * -1
+    end
 
     changeset = Operation.changeset(%Operation{}, %{
       account: params["account"],
