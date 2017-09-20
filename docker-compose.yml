@@ -16,3 +16,12 @@ db:
     - POSTGRES_USER=postgres
     - POSTGRES_PASSWORD=postgres
     - POSTGRES_HOST=db
+test:
+  image: nubankbalancesapi_api
+  command: mix test
+  environment:
+    - MIX_ENV=test
+  volumes_from:
+    - api
+  links:
+    - db

@@ -17,8 +17,8 @@ defmodule PhoenixDocker.AccountController do
 
     days = Enum.group_by(operations, fn(op) -> op.done_at end)
 
-    {periods, balance} = Enum.map_reduce(days, D.new(0), fn({date, daily_operations}, total) ->
-      balance = Enum.reduce(daily_operations, total, fn(op, acc) -> D.add(op.amount, total) end)
+    {periods, _} = Enum.map_reduce(days, D.new(0), fn({date, daily_operations}, total) ->
+      balance = Enum.reduce(daily_operations, total, fn(op, acc) -> D.add(op.amount, acc) end)
 
       start_date = Timex.format! date, "{0D}/{0M}/{YYYY}"
       in_debt = if (D.compare(balance, D.new(0)) == D.new(-1)), do: true, else: false

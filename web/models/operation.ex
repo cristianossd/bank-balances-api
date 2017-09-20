@@ -11,8 +11,8 @@ defmodule PhoenixDocker.Operation do
     timestamps()
   end
 
-  @required_fields ~w(account type description amount done_at)
-  @optional_fields ~w()
+  @required_fields ~w(account type amount done_at)
+  @optional_fields ~w(description)
   @valid_types ~w(purchase withdrawal debit deposit salary credit)
 
   def changeset(model, params \\ :empty) do
