@@ -21,10 +21,7 @@ defmodule PhoenixDocker.AccountController do
       balance = Enum.reduce(daily_operations, total, fn(op, acc) -> D.add(op.amount, total) end)
 
       start_date = Timex.format! date, "{0D}/{0M}/{YYYY}"
-      in_debt = false
-      if D.compare(balance, D.new(0)) == D.new(-1) do
-        in_debt = true
-      end
+      in_debt = if (D.compare(balance, D.new(0)) == D.new(-1)), do: true, else: false
 
       {%{start_date: start_date, principal: balance, in_debt: in_debt}, balance}
     end)
@@ -44,8 +41,12 @@ defmodule PhoenixDocker.AccountController do
     end)
 
     periods = Enum.reverse(periods)
+    debt_periods =
+      periods
+      |> Enum.filter(fn(period) -> period.in_debt end)
+      |> Enum.map(fn(period) -> Map.delete(period, :in_debt) end)
 
     conn
-    |> json(periods)
+    |> json(debt_periods)
   end
 end
