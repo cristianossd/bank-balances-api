@@ -45,12 +45,12 @@ defmodule PhoenixDocker.BalanceController do
       order_by: op.done_at
     )
 
-    statement =
+    {statement, _} =
       operations
       |> Enum.group_by(fn(op) -> op.done_at end)
-      |> Enum.map(fn {date, group} ->
-          {prev_balance, new_statement} = get_daily_statement(date, group, prev_balance)
-          new_statement
+      |> Enum.map_reduce(prev_balance, fn({date, group}, balance_acc) ->
+          {balance_acc, new_statement} = get_daily_statement(date, group, balance_acc)
+          {new_statement, balance_acc}
          end)
 
     conn
