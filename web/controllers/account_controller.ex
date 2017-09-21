@@ -103,7 +103,7 @@ defmodule PhoenixDocker.AccountController do
       zero = D.new(0)
       negative = D.new(-1)
 
-      amount = if (op.amount < zero), do: op.amount * negative, else: op.amount
+      amount = if (D.compare(op.amount, zero) == negative), do: D.mult(op.amount, negative), else: op.amount
       %{description: op.description, amount: amount, type: op.type}
     end)
 
