@@ -8,6 +8,40 @@ defmodule PhoenixDocker.AccountController do
   plug :scrub_params, "start_at" when action in [:get_statement]
   plug :scrub_params, "end_at" when action in [:get_statement]
 
+  def get_statement(conn, %{"account" => account, "start_at" => start_at, "end_at" => end_at}) do
+    {account_num, _} = Integer.parse account
+    {_, start_at} = Timex.parse start_at, "{YYYY}-{0M}-{0D}"
+    {_, end_at} = Timex.parse end_at, "{YYYY}-{0M}-{0D}"
+
+    operations = Repo.all(
+      from op in Operation,
+      where: op.account == ^account_num,
+      where: op.done_at < ^start_at,
+      order_by: op.done_at
+    )
+
+    prev_balance = if (length(operations) == 0), do: D.new(0), else: calculate_balance(operations)
+
+    operations = Repo.all(
+      from op in Operation,
+      where: op.account == ^account_num,
+      where: op.done_at >= ^start_at,
+      where: op.done_at <= ^end_at,
+      order_by: op.done_at
+    )
+
+    {statement, _} =
+      operations
+      |> Enum.group_by(fn(op) -> op.done_at end)
+      |> Enum.map_reduce(prev_balance, fn({date, group}, balance_acc) ->
+          {balance_acc, new_statement} = get_daily_statement(date, group, balance_acc)
+          {new_statement, balance_acc}
+         end)
+
+    conn
+    |> json(statement)
+  end
+
   def get_debt_periods(conn, %{"account" => account}) do
     {account_num, _} = Integer.parse account
 
@@ -46,44 +80,16 @@ defmodule PhoenixDocker.AccountController do
     debt_periods =
       periods
       |> Enum.filter(fn(period) -> period.in_debt end)
-      |> Enum.map(fn(period) -> Map.delete(period, :in_debt) end)
+      |> Enum.map(fn(period) ->
+          period = Map.delete(period, :in_debt)
+          principal = D.mult(period[:principal], D.new(-1))
+          period = Map.put(period, :principal, principal)
+
+          period
+        end)
 
     conn
     |> json(debt_periods)
-  end
-
-  def get_statement(conn, %{"account" => account, "start_at" => start_at, "end_at" => end_at}) do
-    {account_num, _} = Integer.parse account
-    {_, start_at} = Timex.parse start_at, "{YYYY}-{0M}-{0D}"
-    {_, end_at} = Timex.parse end_at, "{YYYY}-{0M}-{0D}"
-
-    operations = Repo.all(
-      from op in Operation,
-      where: op.account == ^account_num,
-      where: op.done_at < ^start_at,
-      order_by: op.done_at
-    )
-
-    prev_balance = if (length(operations) == 0), do: D.new(0), else: calculate_balance(operations)
-
-    operations = Repo.all(
-      from op in Operation,
-      where: op.account == ^account_num,
-      where: op.done_at >= ^start_at,
-      where: op.done_at <= ^end_at,
-      order_by: op.done_at
-    )
-
-    {statement, _} =
-      operations
-      |> Enum.group_by(fn(op) -> op.done_at end)
-      |> Enum.map_reduce(prev_balance, fn({date, group}, balance_acc) ->
-          {balance_acc, new_statement} = get_daily_statement(date, group, balance_acc)
-          {new_statement, balance_acc}
-         end)
-
-    conn
-    |> json statement
   end
 
   defp calculate_balance operations do
