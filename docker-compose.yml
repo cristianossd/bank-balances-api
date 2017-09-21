@@ -18,7 +18,7 @@ db:
     - POSTGRES_HOST=db
 test:
   image: nubankbalancesapi_api
-  command: mix test
+  command: mix test --trace
   environment:
     - MIX_ENV=test
   volumes_from:
