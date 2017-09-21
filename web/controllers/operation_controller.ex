@@ -2,7 +2,6 @@ defmodule PhoenixDocker.OperationController do
   use PhoenixDocker.Web, :controller
 
   alias PhoenixDocker.Operation
-  alias Decimal, as: D
 
   plug :scrub_params, "account" when action in [:create]
   plug :scrub_params, "type" when action in [:create]
