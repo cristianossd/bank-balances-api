@@ -104,7 +104,7 @@ defmodule PhoenixDocker.AccountController do
       negative = D.new(-1)
 
       amount = if (op.amount < zero), do: op.amount * negative, else: op.amount
-      %{description: op.description, amount: amount}
+      %{description: op.description, amount: amount, type: op.type}
     end)
 
     balance = Enum.reduce(operations, balance, fn(op, total) -> D.add(op.amount, total) end)
