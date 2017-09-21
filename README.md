@@ -1,20 +1,40 @@
 # NuBank Balances API
 
-Start the api service `$ sudo docker-compose up -d api`. Install the project dependencies: `$ sudo docker-compose run api mix deps.get`, and to compile: `$ sudo docker-compose run api mix deps.compile`.
+This API consists in implementing basic features of a checking account using Elixir. The sections below describes **how to use** and **api docs**.
 
-Creating the database: `$ sudo docker-compose run api mix ecto.create`. Run the migrations: `$ sudo docker-compose run api mix ecto.migrate`.
+## How to use
 
-Restart the server: `$ sudo docker-compose restart api`.
+First, ensure to have the `docker` and `docker-compose` packages installed, clone this repository and move to api folder. The API service must be started using:
+```bash
+$ sudo docker-compose up -d api
+```
+If the container was started, you can install the project dependencies with the command:
+```bash
+$ sudo docker-compose run --rm api mix deps.get
+```
+After get the dependencies, they must be compiled using:
+```bash
+$ sudo docker-compose run --rm api mix deps.compile
+```
+The dependencies setup was finished. Now, you will prepare the database with:
+```bash
+$ sudo docker-compose run --rm api mix ecto.create
+```
+Run the migrations:
+```bash
+$ sudo docker-compose run --rm api mix ecto.migrate
+```
+Restart the server:
+```bash
+$ sudo docker-compose restart api
+```
+Now, the API is running. You can send requests to [`localhost:4000/api/`](http://localhost:4000/api/) to check the API availability.
 
-To start your Phoenix app:
-
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.create && mix ecto.migrate`
-  * Start Phoenix endpoint with `mix phoenix.server`
-
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-Ready to run in production? Please [check our deployment guides](http://www.phoenixframework.org/docs/deployment).
+### Test Environment
+The API has a basic setup to work in test environment using a docker service. To run the tests, you just need to type:
+```bash
+$ sudo docker-compose run --rm test
+```
 
 ## API Docs
 
