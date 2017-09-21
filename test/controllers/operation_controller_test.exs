@@ -3,7 +3,6 @@ defmodule PhoenixDocker.OperationControllerTest do
   use Plug.Test
   alias PhoenixDocker.Router
 
-
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(PhoenixDocker.Repo)
     Ecto.Adapters.SQL.Sandbox.mode(PhoenixDocker.Repo, {:shared, self()})
