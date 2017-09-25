@@ -1,11 +1,16 @@
 # NuBank Balances API
 
-This API consists in implementing basic features of a checking account using Elixir. The sections below describes **how to use** and **api docs**.
+This API consists in implementing basic features of a checking account using Elixir and Phoenix framework. The application was built to run in docker services (app and database). The sections below describes **how to use** and **api docs**.
 
 ## How to use
 
 First, ensure to have the `docker` and `docker-compose` packages installed, clone this repository and move to api folder. The API service must be started using:
 ```bash
+$ sudo docker-compose up -d api
+```
+**IMPORTANT** In some computers that I tried to run the API, the docker service for `api` wasn't started first time. If the `api` container are not showed in `$ sudo docker ps` command, you should run the sequence commands below, else, just skip this step:
+```bash
+$ sudo docker-compose run --rm api mix deps.get
 $ sudo docker-compose up -d api
 ```
 If the container was started, you can install the project dependencies with the command:
