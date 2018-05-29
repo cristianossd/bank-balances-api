@@ -1,4 +1,4 @@
-# NuBank Balances API
+# Balances API
 
 This API consists in implementing basic features of a checking account using Elixir and Phoenix framework. The application was built to run in docker services (app and database). The sections below describes **how to use** and **api docs**.
 
